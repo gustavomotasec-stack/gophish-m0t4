@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaign Results - Gophish</title>
+    <link href="/css/gophish.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/campaigns"><i class="fa fa-exclamation-circle" style="color:#1abc9c;"></i>&nbsp;gophish</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="/logout" onclick="logout()"><i class="fa fa-sign-out"></i> Sign Out</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="col-sm-3 col-md-2 sidebar">
+        <ul class="nav nav-sidebar">
+            <li class="active"><a href="/campaigns"><i class="fa fa-crosshairs"></i> Campaigns</a></li>
+            <li><a href="/users/groups"><i class="fa fa-users"></i> Users &amp; Groups</a></li>
+            <li><a href="/email_templates"><i class="fa fa-envelope"></i> Email Templates</a></li>
+            <li><a href="/landing_pages"><i class="fa fa-file"></i> Landing Pages</a></li>
+            <li><a href="/sending_profiles"><i class="fa fa-wifi"></i> Sending Profiles</a></li>
+            <li><a href="/settings"><i class="fa fa-cog"></i> Account Settings</a></li>
+        </ul>
+    </div>
+
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        <div id="loading"><i class="fa fa-spinner fa-spin fa-4x"></i></div>
+        <div style="display:none;" id="campaignResults">
+            <div class="row">
+                <h1 class="page-header" id="page-title">Results</h1>
+            </div>
+            <div class="row">
+                <a href="/campaigns" class="btn btn-default"><i class="fa fa-arrow-circle-o-left fa-lg"></i> Back</a>
+                <div class="btn-group">
+                    <button type="button" id="exportButton" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-file-excel-o"></i> Export CSV <i class="fa fa-caret-down"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-header">Email</li>
+                        <li><a href="#" onclick="exportAsCSV('results')">Results</a></li>
+                        <li><a href="#" onclick="exportAsCSV('events')">Raw Events</a></li>
+                        <li class="divider"></li>
+                        <li class="dropdown-header"><i class="fa fa-whatsapp"></i> WhatsApp</li>
+                        <li><a href="#" onclick="exportAsCSV('whatsapp_results')">WhatsApp Results</a></li>
+                        <li><a href="#" onclick="exportAsCSV('whatsapp_events')">WhatsApp Events</a></li>
+                    </ul>
+                </div>
+                <button id="complete_button" type="button" class="btn btn-primary" onclick="completeCampaign()">
+                    <i class="fa fa-flag-checkered"></i> Complete
+                </button>
+                <button type="button" class="btn btn-danger" onclick="deleteCampaign()">
+                    <i class="fa fa-trash-o fa-lg"></i> Delete
+                </button>
+                <button id="refresh_btn" type="button" class="btn btn-primary" onclick="refresh()">
+                    <i class="fa fa-refresh fa-lg"></i> Refresh
+                </button>
+                <button id="whatsapp_btn" type="button" class="btn btn-success" data-toggle="modal" data-target="#whatsappModal">
+                    <i class="fa fa-whatsapp fa-lg"></i> Gerar Links WhatsApp
+                </button>
+                <span id="refresh_message" style="display:none;">
+                    <i class="fa fa-spin fa-spinner"></i> Refreshing
+                </span>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="row">
+                        <div class="col-lg-12"><div id="timeline_chart"></div></div>
+                    </div>
+                    <!-- Email Charts -->
+                    <div class="row">
+                        <div class="col-lg-12" style="padding:0 15px 4px;">
+                            <small class="text-muted" style="font-weight:600;letter-spacing:1px;text-transform:uppercase;">
+                                <i class="fa fa-envelope"></i> Email
+                            </small>
+                            <hr style="margin:4px 0 0;">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div style="height:200px;" class="col-lg-1 col-md-1"></div>
+                        <div id="sent_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
+                        <div id="opened_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
+                        <div id="clicked_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
+                        <div id="submitted_data_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
+                        <div id="reported_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
+                        <div style="height:200px;" class="col-lg-1 col-md-1"></div>
+                    </div>
+                    <!-- WhatsApp Charts -->
+                    <div class="row">
+                        <div class="col-lg-12" style="padding:0 15px 4px;">
+                            <small class="text-muted" style="font-weight:600;letter-spacing:1px;text-transform:uppercase;">
+                                <i class="fa fa-whatsapp"></i> WhatsApp
+                            </small>
+                            <hr style="margin:4px 0 0;">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div style="height:200px;" class="col-lg-2 col-md-2"></div>
+                        <div id="wa_generated_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
+                        <div style="height:200px;" class="col-lg-1 col-md-1"></div>
+                        <div id="wa_clicked_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
+                        <div style="height:200px;" class="col-lg-1 col-md-1"></div>
+                        <div id="wa_submitted_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
+                        <div style="height:200px;" class="col-lg-2 col-md-2"></div>
+                    </div>
+                    <div class="row" id="resultsMapContainer" style="display:none;">
+                        <div class="col-md-6">
+                            <p style="text-align:center;">Targets Map</p>
+                            <div id="resultsMap"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <h2>Details</h2>
+                <ul class="nav nav-tabs" id="resultsTabs">
+                    <li class="active"><a href="#tab-email" data-toggle="tab">Email</a></li>
+                    <li><a href="#tab-whatsapp" data-toggle="tab"><i class="fa fa-whatsapp"></i> WhatsApp</a></li>
+                </ul>
+                <div class="tab-content" style="padding-top:15px;">
+                    <div class="tab-pane active" id="tab-email">
+                        <table id="resultsTable" class="table">
+                            <thead><tr>
+                                <th>Result ID</th>
+                                <th class="no-sort"></th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Email</th>
+                                <th>Position</th>
+                                <th>Status</th>
+                                <th class="text-center">Reported</th>
+                            </tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane" id="tab-whatsapp">
+                        <table id="whatsappResultsTable" class="table">
+                            <thead><tr>
+                                <th>Result ID</th>
+                                <th class="no-sort"></th>
+                                <th>Nome</th>
+                                <th>Status</th>
+                                <th class="text-center">Reported</th>
+                            </tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="flashes" class="row"></div>
+    </div>
+
+    <!-- WhatsApp Modal -->
+    <div class="modal fade" id="whatsappModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    <h4 class="modal-title"><i class="fa fa-whatsapp"></i> Gerar Links WhatsApp</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="whatsapp_modal_alert"></div>
+                    <div class="form-group">
+                        <label for="whatsapp_count">Quantidade de links</label>
+                        <input type="number" class="form-control" id="whatsapp_count" min="1" max="1000" value="10">
+                        <p class="help-block">Máximo de 1000 links por geração.</p>
+                    </div>
+                    <div id="whatsapp_links_area" style="display:none;">
+                        <label>Links gerados:</label>
+                        <textarea id="whatsapp_links_text" class="form-control" rows="10" readonly style="font-size:12px;font-family:monospace;"></textarea>
+                        <br>
+                        <button type="button" class="btn btn-success btn-block" onclick="copyWhatsAppLinks()">
+                            <i class="fa fa-copy"></i> Copiar todos os links
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+                    <button type="button" id="whatsapp_generate_btn" class="btn btn-primary" onclick="generateWhatsAppLinks()">
+                        <i class="fa fa-bolt"></i> Gerar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9/dist/sweetalert2.all.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0.7.31/src/ua-parser.min.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/dist/app/campaign_results.min.js"></script>
+</body>
+</html>

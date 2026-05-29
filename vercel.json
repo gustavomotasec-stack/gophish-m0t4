@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "functions": {
+    "api/**/*.go": {
+      "runtime": "vercel-go@0.4.0"
+    }
+  },
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/track", "dest": "/api/track/index.go" },
+    { "src": "/report", "dest": "/api/track/report.go" },
+    { "src": "/campaigns/(.*)", "dest": "/public/campaign_results.html" },
+    { "src": "/campaigns", "dest": "/public/campaigns.html" },
+    { "src": "/login", "dest": "/public/login.html" },
+    { "src": "/", "dest": "/public/login.html" },
+    { "src": "/(.*)", "dest": "/public/$1" }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/send-emails",
+      "schedule": "* * * * *"
+    }
+  ]
+}

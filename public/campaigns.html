@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaigns - Gophish</title>
+    <link href="/css/gophish.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/campaigns"><i class="fa fa-exclamation-circle" style="color:#1abc9c;"></i>&nbsp;gophish</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="/logout" onclick="logout()"><i class="fa fa-sign-out"></i> Sign Out</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="col-sm-3 col-md-2 sidebar">
+        <ul class="nav nav-sidebar">
+            <li class="active"><a href="/campaigns"><i class="fa fa-crosshairs"></i> Campaigns</a></li>
+            <li><a href="/users/groups"><i class="fa fa-users"></i> Users &amp; Groups</a></li>
+            <li><a href="/email_templates"><i class="fa fa-envelope"></i> Email Templates</a></li>
+            <li><a href="/landing_pages"><i class="fa fa-file"></i> Landing Pages</a></li>
+            <li><a href="/sending_profiles"><i class="fa fa-wifi"></i> Sending Profiles</a></li>
+            <li><a href="/settings"><i class="fa fa-cog"></i> Account Settings</a></li>
+        </ul>
+    </div>
+
+    <!-- Main content -->
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        <div class="row">
+            <h1 class="page-header">Campaigns</h1>
+        </div>
+        <div id="flashes" class="row"></div>
+        <div class="row">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-backdrop="static" data-target="#modal" onclick="edit('new')">
+                <i class="fa fa-plus"></i> New Campaign
+            </button>
+        </div>
+        &nbsp;
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="active"><a href="#activeCampaigns" data-toggle="tab">Active Campaigns</a></li>
+            <li><a href="#archivedCampaigns" data-toggle="tab">Archived Campaigns</a></li>
+        </ul>
+        <br>
+        <div class="tab-content">
+            <div class="tab-pane active" id="activeCampaigns">
+                <div id="loading"><i class="fa fa-spinner fa-spin fa-4x"></i></div>
+                <div id="emptyMessage" class="row" style="display:none;">
+                    <div class="alert alert-info">No campaigns yet. Create one!</div>
+                </div>
+                <div class="row">
+                    <table id="campaignTable" class="table" style="display:none;">
+                        <thead><tr>
+                            <th class="col-md-3">Name</th>
+                            <th class="col-md-4">Created Date</th>
+                            <th class="col-md-2">Status</th>
+                            <th class="col-md-3 no-sort"></th>
+                        </tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane" id="archivedCampaigns">
+                <br>
+                <div class="row">
+                    <table id="campaignTableArchive" class="table" style="display:none;">
+                        <thead><tr>
+                            <th class="col-md-3">Name</th>
+                            <th class="col-md-4">Created Date</th>
+                            <th class="col-md-2">Status</th>
+                            <th class="col-md-3 no-sort"></th>
+                        </tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Campaign Modal -->
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" onclick="dismiss()"><span>&times;</span></button>
+                    <h4 class="modal-title">New Campaign</h4>
+                </div>
+                <div class="modal-body" id="modal_body">
+                    <div class="row" id="modal.flashes"></div>
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" class="form-control" id="name" placeholder="Campaign name" autofocus>
+                        <label class="control-label" for="template">Email Template:</label>
+                        <select class="form-control" id="template"><option></option></select>
+                        <label class="control-label" for="page">Landing Page:</label>
+                        <select class="form-control" id="page"><option></option></select>
+                        <label class="control-label" for="url">URL:</label>
+                        <input type="text" class="form-control" placeholder="http://192.168.1.1" id="url">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="control-label">Launch Date</label>
+                                <input type="text" class="form-control" id="launch_date">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="control-label">Send Emails By (Optional)</label>
+                                <input type="text" class="form-control" id="send_by_date" autocomplete="off">
+                            </div>
+                        </div>
+                        <label class="control-label" for="profile">Sending Profile:</label>
+                        <div class="input-group">
+                            <select class="form-control" id="profile"><option></option></select>
+                        </div>
+                        <label class="control-label" for="users">Groups:</label>
+                        <select class="form-control" id="users" multiple="multiple"></select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="dismiss()">Close</button>
+                    <button type="button" id="launchButton" class="btn btn-primary" onclick="launch()">
+                        <i class="fa fa-rocket"></i> Launch Campaign
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/eonasdan-bootstrap-datetimepicker/4.17.49/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9/dist/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/eonasdan-bootstrap-datetimepicker/4.17.49/css/bootstrap-datetimepicker.min.css">
+    <script src="/js/api.js"></script>
+    <script src="/js/dist/app/campaigns.min.js"></script>
+</body>
+</html>

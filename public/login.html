@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Gophish</title>
+    <link href="/css/gophish.css" rel="stylesheet">
+    <style>
+        body { background: #283F50; }
+        .login-container { max-width: 400px; margin: 100px auto; }
+        .login-logo { text-align: center; margin-bottom: 30px; }
+        .login-logo img { height: 60px; }
+        .login-logo h1 { color: #fff; font-size: 36px; margin-top: 10px; }
+        .panel { border-radius: 4px; }
+        .panel-body { padding: 30px; }
+        .btn-login { background: #1abc9c; border: none; color: #fff; width: 100%; padding: 12px; font-size: 16px; border-radius: 4px; cursor: pointer; }
+        .btn-login:hover { background: #16a085; }
+        #error-msg { display: none; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-logo">
+            <h1><i class="fa fa-exclamation-circle" style="color:#1abc9c;"></i> gophish</h1>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="error-msg" class="alert alert-danger"></div>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="username" placeholder="Username" autofocus>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Password">
+                </div>
+                <button class="btn-login" onclick="doLogin()">
+                    <span id="btn-text"><i class="fa fa-sign-in"></i> Sign In</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Redirect if already logged in
+        var token = localStorage.getItem('gophish_token')
+        if (token) { window.location = '/campaigns' }
+
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') doLogin()
+        })
+
+        function doLogin() {
+            var username = document.getElementById('username').value
+            var password = document.getElementById('password').value
+            document.getElementById('btn-text').innerHTML = '<i class="fa fa-spinner fa-spin"></i> Signing in...'
+            document.getElementById('error-msg').style.display = 'none'
+
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ username: username, password: password })
+            })
+            .then(function(r) { return r.json() })
+            .then(function(data) {
+                if (data.token) {
+                    localStorage.setItem('gophish_token', data.token)
+                    localStorage.setItem('gophish_user', JSON.stringify(data.user))
+                    window.location = '/campaigns'
+                } else {
+                    showError(data.message || 'Invalid credentials')
+                }
+            })
+            .catch(function() { showError('Connection error') })
+        }
+
+        function showError(msg) {
+            var el = document.getElementById('error-msg')
+            el.textContent = msg
+            el.style.display = 'block'
+            document.getElementById('btn-text').innerHTML = '<i class="fa fa-sign-in"></i> Sign In'
+        }
+    </script>
+</body>
+</html>
