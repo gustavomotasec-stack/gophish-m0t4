@@ -1,0 +1,14 @@
+# Credenciais locais — NUNCA commitar
+.env
+.env.local
+.env*.local
+
+# Binários Go
+*.exe
+*.out
+
+# Dependências
+vendor/
+
+# Vercel
+.vercel
