@@ -24,7 +24,14 @@ var (
 
 func GetDB() *gorm.DB {
 	once.Do(func() {
+		// Neon usa POSTGRES_URL ou POSTGRES_URL_NON_POOLING, Vercel usava DATABASE_URL
 		dsn := os.Getenv("DATABASE_URL")
+		if dsn == "" {
+			dsn = os.Getenv("POSTGRES_URL")
+		}
+		if dsn == "" {
+			dsn = os.Getenv("POSTGRES_URL_NON_POOLING")
+		}
 		var err error
 		DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
